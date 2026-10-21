@@ -1,0 +1,6 @@
+{
+  "name": "Software Employees",
+  "description": "Minimal and interactive platform to hire pre-vetted Software Employees and managers across onboarding, sales, funnels, operations, team leadership, and support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
