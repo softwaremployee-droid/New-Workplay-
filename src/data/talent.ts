@@ -1,3 +1,5 @@
+import persistedCandidateMedia from './persistedCandidateMedia.json';
+
 export interface Candidate {
   id: string;
   code: string;
@@ -301,4 +303,17 @@ export const CANDIDATES: Candidate[] = [
       communication: 100,
     },
   },
-];
+].map((c) => {
+  const extra = (
+    persistedCandidateMedia as Record<
+      string,
+      {
+        resumeUrl?: string;
+        resumeFileName?: string;
+        resumeMimeType?: string;
+      }
+    >
+  )[c.id];
+  return extra ? { ...c, ...extra } : c;
+});
+

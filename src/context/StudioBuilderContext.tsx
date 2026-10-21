@@ -1356,6 +1356,39 @@ export const StudioBuilderProvider: React.FC<{ children: React.ReactNode }> = ({
     safeLocalStorageSet(STORAGE_KEY, payload);
     void idbSet(STORAGE_KEY, payload);
     void saveEmployeeMediaToVault(candidates);
+
+    // Sync any custom uploaded employee cutout photos & resumes directly into /src/assets/images/
+    const hasCustomMedia = candidates.some(
+      (c) =>
+        (typeof c.imageSrc === 'string' && c.imageSrc.startsWith('data:image/')) ||
+        Boolean(c.resumeUrl)
+    );
+    if (hasCustomMedia) {
+      fetch('/api/sync-src-assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          candidates: candidates.map((c) => ({
+            id: c.id,
+            imageSrc: c.imageSrc,
+            resumeUrl: c.resumeUrl,
+            resumeFileName: c.resumeFileName,
+            resumeMimeType: c.resumeMimeType,
+          })),
+        }),
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data && data.ok && data.updatedCount > 0) {
+            notifySaved(
+              `✓ Synced ${data.updatedCount} employee cutout photo(s) into /src/assets/images for GitHub`
+            );
+          }
+        })
+        .catch(() => {
+          // Ignore in static production hosting where dev middleware is absent
+        });
+    }
   }, [
     sectionOrder,
     hiddenSections,
@@ -1368,6 +1401,7 @@ export const StudioBuilderProvider: React.FC<{ children: React.ReactNode }> = ({
     faqs,
     interactions,
     customBlocks,
+    notifySaved,
   ]);
 
   const moveSection = (fromIndex: number, toIndex: number) => {
